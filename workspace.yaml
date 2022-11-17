@@ -1,0 +1,59 @@
+Description: This template deploys workspace.
+
+Parameters:
+  Bundle:
+    Type: String
+    Description: Select the bundle that should be deployed
+    Default: "wsb-gk1wpk43z"
+
+  User:
+    Type: String
+    Description: Enter the username who will use the WorkSpace
+    Default: username
+
+  IsRootVolumeEncrypted:
+    Type: String
+    Description: Inform if Root Volume will be encrypted
+    AllowedValues:
+      - true
+      - false
+    Default: "true"
+
+  IsUserVolumeEncrypted:
+    Type: String
+    Description: Inform if User Volume will be encrypted
+    AllowedValues:
+      - true
+      - false
+    Default: "true"
+
+  EncryptionKey:
+    Description: Select the KMS encryption key to encrypt WorkSpace volumes
+    Type: String
+    Default: "arn:aws:kms:"
+
+  RunningModeType:
+    Type: String
+    Description: Enter Running Mode
+    AllowedValues:
+      - ALWAYS_ON
+      - AUTO_STOP
+    Default: "AUTO_STOP"
+
+Resources:
+  WorkSpace:
+    Type: AWS::WorkSpaces::Workspace
+    Properties:
+      DirectoryId: !Sub "{{resolve:secretsmanager:/directoryIDsecret:SecretString}}"
+      UserName: !Ref User
+      BundleId: !Ref Bundle
+      RootVolumeEncryptionEnabled: !Ref IsRootVolumeEncrypted
+      UserVolumeEncryptionEnabled: !Ref IsUserVolumeEncrypted
+      VolumeEncryptionKey: !Ref EncryptionKey
+      WorkspaceProperties:
+        RunningMode: !Ref RunningModeType
+
+Outputs:
+  WorkSpaceId:
+    Description: ID of the WorkSpaces
+    Value: !Ref WorkSpace
